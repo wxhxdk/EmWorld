@@ -1,0 +1,35 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# 顶层配置文件
+root = true
+
+# 所有文件都使用
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C++ 源文件
+[*.{cpp,h,hpp}]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# QML 文件
+[*.qml]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# CMake 文件
+[CMakeLists.txt]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# 资源文件
+[*.qrc]
+charset = utf-8
+indent_style = space
+indent_size = 2 
