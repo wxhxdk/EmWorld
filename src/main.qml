@@ -8,10 +8,10 @@ import QtQuick.Layouts
  */
 ApplicationWindow {
     id: window
-    width: 1024
-    height: 768
+    width: 390  // iPhone 12 width
+    height: 844 // iPhone 12 height
     visible: true
-    title: qsTr("Qt Plugin System")
+    title: qsTr("EmWorld")
 
     // Add debug function
     function debugObject(obj) {
@@ -48,107 +48,132 @@ ApplicationWindow {
         }
     }
 
-    // 主布局：使用RowLayout实现左右分栏
-    RowLayout {
+    StackLayout {
+        id: stackLayout
         anchors.fill: parent
-        spacing: 10
+        anchors.bottomMargin: tabBar.height // 为底部导航栏留出空间
 
-        // 左侧：插件列表面板
-        Rectangle {
-            Layout.preferredWidth: 200
-            Layout.fillHeight: true
-            color: "#f0f0f0"  // 浅灰色背景
-            
-            // 插件列表的垂直布局
-            ColumnLayout {
+        // 首页
+        Page {
+            Rectangle {
                 anchors.fill: parent
-                anchors.margins: 10
-                spacing: 10
-
-                // 标题文本
+                color: "#f8f8f8"
                 Label {
-                    text: qsTr("Loaded Plugins")
-                    font.bold: true
-                    font.pixelSize: 16
-                }
-
-                // 插件列表视图
-                ListView {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    // 使用pluginManager的loadedPlugins属性作为数据源
-                    model: pluginManager ? pluginManager.loadedPlugins : []
-                    // 列表项委托
-                    delegate: ItemDelegate {
-                        width: parent.width
-                        text: modelData  // 显示插件名称
-                        
-                        // 卸载按钮
-                        Button {
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Unload"
-                            // 点击时卸载对应的插件
-                            onClicked: {
-                                if (pluginManager) {
-                                    pluginManager.unloadPlugin(modelData)
-                                }
-                            }
-                        }
-                    }
+                    anchors.centerIn: parent
+                    text: qsTr("首页")
+                    font.pixelSize: 20
                 }
             }
         }
 
-        // 右侧：插件内容显示区域
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: "#ffffff"  // 白色背景
-            
-            // 插件内容的垂直布局
+        // 课堂
+        Page {
+            Rectangle {
+                anchors.fill: parent
+                color: "#f8f8f8"
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("课堂")
+                    font.pixelSize: 20
+                }
+            }
+        }
+
+        // 说说
+        Page {
+            Rectangle {
+                anchors.fill: parent
+                color: "#f8f8f8"
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("说说")
+                    font.pixelSize: 20
+                }
+            }
+        }
+
+        // 我的（原主界面内容）
+        Page {
+            id: myPage
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 10
                 spacing: 10
 
-                // 标题文本
-                Label {
-                    text: qsTr("Plugin Content")
-                    font.bold: true
-                    font.pixelSize: 16
+                // 顶部标题
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 50
+                    color: "#f0f0f0"
+                    Label {
+                        anchors.centerIn: parent
+                        text: qsTr("插件管理")
+                        font.bold: true
+                        font.pixelSize: 18
+                    }
                 }
 
-                // 插件内容列表视图
+                // 插件列表
                 ListView {
-                    id: pluginContentView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    // 使用相同的数据源
+                    Layout.margins: 10
+                    clip: true
+                    spacing: 10
                     model: pluginManager ? pluginManager.loadedPlugins : []
-                    // 内容显示委托
-                    delegate: Component {
-                        Item {
-                            width: pluginContentView.width
-                            height: 400
+                    delegate: Rectangle {
+                        width: parent.width
+                        height: modelData.includes("VideoPlayer") ? 400 : 120  // 视频播放器使用更大的高度
+                        radius: 8
+                        color: "#ffffff"
+                        border.color: "#e0e0e0"
+                        border.width: 1
 
-                            // 使用Loader动态加载插件的QML界面
-                            Loader {
-                                id: pluginLoader
-                                anchors.fill: parent
-                                // 获取插件的QML对象
-                                property var pluginObject: pluginManager ? 
-                                    pluginManager.getPluginQmlObject(modelData) : null
-                                // 设置QML源
-                                source: pluginObject ? pluginObject.qmlPath : ""
-                                
-                                // 监听加载状态
-                                onStatusChanged: {
-                                    if (status === Loader.Error) {
-                                        console.error("Error loading plugin QML:", source)
-                                    } else if (status === Loader.Ready && item) {
-                                        // 加载成功后，将插件对象传递给QML
-                                        item.pluginObject = pluginObject
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 5
+
+                            // 插件名称和卸载按钮
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                Label {
+                                    text: modelData
+                                    font.bold: true
+                                    font.pixelSize: 16
+                                    Layout.fillWidth: true
+                                }
+                                Button {
+                                    text: qsTr("卸载")
+                                    onClicked: {
+                                        if (pluginManager) {
+                                            pluginManager.unloadPlugin(modelData)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 插件内容区域
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.preferredHeight: modelData.includes("VideoPlayer") ? 350 : 70  // 视频播放器使用更大的高度
+                                color: "#f8f8f8"
+                                radius: 4
+
+                                Loader {
+                                    anchors.fill: parent
+                                    anchors.margins: modelData.includes("VideoPlayer") ? 0 : 5  // 视频播放器不需要内边距
+                                    property var pluginObject: pluginManager ? 
+                                        pluginManager.getPluginQmlObject(modelData) : null
+                                    source: pluginObject ? pluginObject.qmlPath : ""
+                                    
+                                    onStatusChanged: {
+                                        if (status === Loader.Error) {
+                                            console.error("Error loading plugin QML:", source)
+                                        } else if (status === Loader.Ready && item) {
+                                            item.pluginObject = pluginObject
+                                        }
                                     }
                                 }
                             }
@@ -156,6 +181,41 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+    }
+
+    // 底部导航栏
+    TabBar {
+        id: tabBar
+        width: parent.width
+        anchors.bottom: parent.bottom
+        currentIndex: stackLayout.currentIndex
+        onCurrentIndexChanged: stackLayout.currentIndex = currentIndex
+        background: Rectangle {
+            color: "#ffffff"
+            Rectangle {
+                anchors.top: parent.top
+                width: parent.width
+                height: 1
+                color: "#e0e0e0"
+            }
+        }
+
+        TabButton {
+            text: qsTr("首页")
+            width: tabBar.width / 4
+        }
+        TabButton {
+            text: qsTr("课堂")
+            width: tabBar.width / 4
+        }
+        TabButton {
+            text: qsTr("说说")
+            width: tabBar.width / 4
+        }
+        TabButton {
+            text: qsTr("我的")
+            width: tabBar.width / 4
         }
     }
 } 
