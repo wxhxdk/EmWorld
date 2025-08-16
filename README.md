@@ -1,4 +1,4 @@
-# Qt Plugin System
+# Qt Plugin Management System
 
 这是一个基于Qt6的插件管理系统示例，包含一个视频播放插件的实现。
 
